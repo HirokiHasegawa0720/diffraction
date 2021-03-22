@@ -13,7 +13,6 @@ from sklearn.datasets import fetch_california_housing
 from sklearn.neural_network import MLPClassifier, MLPRegressor
 from sklearn.model_selection import GridSearchCV
 from matplotlib.font_manager import FontProperties
-import japanize_matplotlib
 import seaborn as sns
 from scipy.optimize import curve_fit
 #C2H2 O2
@@ -183,8 +182,11 @@ import subprocess
 import re
 
 
-cea_path = "C:\CEA\cea-exec"    # PATH to NASA-CEA
-fcea2m = "C:\CEA\cea-exec\FCEA2m.exe" # fcea2m.exe
+#cea_path = "C:\CEA\cea-exec"    # PATH to NASA-CEA
+#fcea2m = "C:\CEA\cea-exec\FCEA2m.exe" # fcea2m.exe
+
+cea_path = "/mnt/c/CEA/cea-exec"    # PATH to NASA-CEA
+fcea2m = "/mnt/c/CEA/cea-exec/FCEA2m.exe" # fcea2m.exe
 
 
 class NASAcea():
@@ -681,4 +683,4 @@ df['M_CJ']=MCJ
 df['V_CJ[m/s]']=VCJ
 
 print(df)
-df.to_excel('\\CEA\\c2h2-c2h4-h2-c2h6-C2H2AR50-C2H2AR80-C2H4AR75.xlsx')
+df.to_excel('/mnt/c/CEA/c2h2-c2h4-h2-c2h6-C2H2AR50-C2H2AR80-C2H4AR75.xlsx')
