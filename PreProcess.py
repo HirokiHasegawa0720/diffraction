@@ -5,7 +5,10 @@ import os
 import subprocess
 import re
 
-df = pd.read_excel('/mnt/c/CEA/DetonationDatabase.xlsx')
+df = pd.read_excel('DetonationDatabase.xlsx')
+
+cea_path = "/mnt/c/CEA/cea-exec"    # PATH to NASA-CEA
+fcea2m = "/mnt/c/CEA/cea-exec/FCEA2m.exe" # fcea2m.exe
 
 class Predata:
 
@@ -80,9 +83,6 @@ dfs['diluent_ratio3'] = diluent_ratio3
 
 dfs['P'] = P
 dfs['LR'] = LR
-
-cea_path = "/mnt/c/CEA/cea-exec"    # PATH to NASA-CEA
-fcea2m = "/mnt/c/CEA/cea-exec/FCEA2m.exe" # fcea2m.exe
 
 
 class NASAcea():
@@ -495,4 +495,4 @@ dfs['rho_CJ/rho0']=rhorhoccj
 dfs['M_CJ']=MCJ
 dfs['V_CJ[m/s]']=VCJ
 
-dfs.to_excel('/mnt/c/CEA/all_mixture.xlsx')
+dfs.to_excel('all_mixture.xlsx')
