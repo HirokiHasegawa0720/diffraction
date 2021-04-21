@@ -14,7 +14,7 @@ def seikika(h):
     h1=np.array(h)
     return list(((h1)-minh)/(maxh-minh))
 
-df = pd.read_excel('/mnt/c/CEA/all_mixture.xlsx')
+df = pd.read_excel('all_mixture.xlsx')
 
 output=df['LR'] #output= Coefficienta or LR
 
