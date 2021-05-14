@@ -104,7 +104,7 @@ class neural:
                     b=[j]*i
                     b=tuple(b)
                     hidd.append(b)
-            alp=[ 1e-7,1e-4,1e-1,1e+0]
+            alp=[ 1e-7,1e-4,1e-1]
             param_grid = {'solver':sol,'activation':act,'hidden_layer_sizes':hidd,'alpha':alp}
             grid = GridSearchCV(MLPRegressor(),param_grid,cv=3)
             grid.fit(x_trains,y_trains)
