@@ -5,7 +5,7 @@ import os
 import subprocess
 import re
 
-df = pd.read_excel('DetonationDatabase.xlsx')
+df = pd.read_excel('/mnt/c/CEA/DetonationDatabase.xlsx')
 
 cea_path = "/mnt/c/CEA/cea-exec"    # PATH to NASA-CEA
 fcea2m = "/mnt/c/CEA/cea-exec/FCEA2m.exe" # fcea2m.exe
@@ -283,7 +283,7 @@ class NASAceashock():
 
         index_u = ['U0[m/s]', 'rho0[kg/m^3]', 'U0[kg/kj]', 'G0[kg/kj]', 'S0[kg/kj]', 'Cp0[kj/kgK]','SonicVelocity0[m/s]']
         index_b = ['Uvn[m/s]','Pvn[bar]', 'Tvn[K]', 'rhovn[kg/m^3]', 'Hvn[KJ/kg]', 'Uvn[KJ/kg]', 'Gvn[KJ/kg]', 'Svn[KJ/kg K]',\
-                    'Mvn', 'Cpvn[KJ/kg K]', 'gammavn', 'SonicVelocityvn[m/s]']
+                    'Mvn[kg/kmol]', 'Cpvn[KJ/kg K]', 'gammavn', 'SonicVelocityvn[m/s]']
                     
         index_d = ['Pvn/P0', 'Tvn/Tc', 'Mvn[kg/kmol]/M0[kg/kmol]', 'rhovn/rho0', 'V_vn[m/s]']
 
@@ -455,7 +455,6 @@ dfs['U0[kg/kj]']=U0kgkj
 dfs['G0[kg/kj]']=G0
 dfs['S0[kg/kj]']=S0
 dfs['Cp0[kj/kgK]']=Cp0
-dfs['SonicVelocity0[m/s]']=SonicVelocity0
 
 dfs['Uvn[m/s]']=Uvnms
 dfs['Pvn[bar]']=Pvn
@@ -495,4 +494,4 @@ dfs['rho_CJ/rho0']=rhorhoccj
 dfs['M_CJ']=MCJ
 dfs['V_CJ[m/s]']=VCJ
 
-dfs.to_excel('all_mixture.xlsx')
+dfs.to_excel('/mnt/c/CEA/all_mixture.xlsx')
