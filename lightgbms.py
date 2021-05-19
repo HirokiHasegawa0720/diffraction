@@ -71,101 +71,14 @@ print(dfs)
 gbm_reg1 = lgb.LGBMRegressor(objective='regression',
                         num_leaves = 31,
                         n_estimators=100)
-in_features_to_select = 1
-selector = RFECV(gbm_reg1 , min_features_to_select=in_features_to_select, cv=3,scoring='r2')
-selector = selector.fit(X_train ,  y_train)
-X_new = pd.DataFrame(selector.fit_transform(X, y), 
-                     columns=X.columns.values[selector.get_support()])
-print(X_new)
-result = pd.DataFrame(selector.get_support(), index=X.columns.values, columns=['False: dropped'])
-print(result)
-result['ranking'] = selector.ranking_
-print(result)
-
-plt.figure(figsize=(6,5))
-
-plt.rcParams['font.size'] = 18
-plt.rcParams['font.family'] = 'Arial'
-plt.rcParams['lines.linewidth'] = 2
-plt.rcParams['lines.markersize'] = 4.0
-
-plt.rcParams['axes.linewidth'] = 2.0
-
-# Tick Setting
-plt.rcParams['xtick.direction'] = 'in'
-plt.rcParams['ytick.direction'] = 'in'
-plt.rcParams['xtick.top'] = True
-plt.rcParams['ytick.right'] = True
-
-plt.rcParams['xtick.major.size'] = 10
-plt.rcParams['xtick.major.width'] = 2.0
-plt.rcParams['ytick.major.size'] = 10
-plt.rcParams['ytick.major.width'] = 2.0
-
-plt.rcParams['xtick.minor.visible'] = True
-plt.rcParams['xtick.minor.size'] = 5
-plt.rcParams['xtick.minor.width'] = 1.5
-plt.rcParams['ytick.minor.visible'] = True
-plt.rcParams['ytick.minor.size'] = 5
-plt.rcParams['ytick.minor.width'] = 1.5
-plt.xlabel("Number of features selected")
-plt.ylabel("Cross validation score (r2)")
-plt.plot(range(in_features_to_select,
-               len(selector.grid_scores_) + in_features_to_select),
-         selector.grid_scores_)
-plt.ylim(0,1)
-plt.savefig("gurafu3.png")
-
-
-Xnew_train , Xnew_test, ynew_train, ynew_test = train_test_split(X_new, y, train_size=0.6, random_state=123)
-
-
-param_grid ={'n_estimators':[100,200,300,400,500],'max_depth':[10,100,50],'min_data_in_leaf':[100,300,500], 'num_leaves':[10,100,30],'learning_rate':[0.1,0.05,0.01]}
-
-forest_grid = GridSearchCV(lgb.LGBMRegressor(objective='regression',
-                        num_leaves = 31),
-                 param_grid = param_grid,   
-                 scoring="r2",  #metrics
-                 cv = 3,              #cross-validation
-                 n_jobs = 1)          #number of core
-
-forest_grid.fit(X_train,y_train) #fit
-result = forest_grid.predict(X_test)
-MSE=mean_squared_error(ynew_test, result)
-R2=r2_score(ynew_test,result)
-print(MSE,R2)
-forest_grid_best = forest_grid.best_estimator_ #best estimator
-print("Best Model Parameter: ",forest_grid.best_params_)
-
-
-
-forest_grid.fit(Xnew_train, ynew_train) #fit
-result = forest_grid.predict(Xnew_test)
-MSE=mean_squared_error(ynew_test, result)
-R2=r2_score(ynew_test,result)
-print(MSE,R2)
-forest_grid_best = forest_grid.best_estimator_ #best estimator
-print("Best Model Parameter: ",forest_grid.best_params_)
-
-
-'''
-
-
-
-
-
-
-
-gbm_reg2 = lgb.LGBMRegressor(objective='regression',
-                        num_leaves = 31,
-                        n_estimators=100)
-gbm_reg2.fit(X_train, y_train,
+gbm_reg1.fit(X_train, y_train,
         eval_set=[(X_test, y_test)],
         eval_metric='l2',
         verbose=0)
 
+
 # Feature Importances
-fti = gbm_reg2.feature_importances_
+fti = gbm_reg1.feature_importances_
 
 print('Feature Importances:')
 for i, feat in enumerate(X.columns):
@@ -203,7 +116,98 @@ plt.rcParams['xtick.minor.width'] = 1.5
 
 
 plot_feature_importance(df_importance)
+plt.savefig("gurafu3.png")
+
+
+
+
+
+gbm_reg2 = lgb.LGBMRegressor(objective='regression',
+                        num_leaves = 31,
+                        n_estimators=100)
+
+in_features_to_select = 1
+selector = RFECV(gbm_reg2 , min_features_to_select=in_features_to_select, cv=5,scoring='r2')
+selector = selector.fit(X ,  y)
+X_new = pd.DataFrame(selector.fit_transform(X, y), 
+                     columns=X.columns.values[selector.get_support()])
+
+print(X_new.columns)
+
+result = pd.DataFrame(selector.get_support(), index=X.columns.values, columns=['False: dropped'])
+result['ranking'] = selector.ranking_
+
+plt.figure(figsize=(6,5))
+
+plt.rcParams['font.size'] = 18
+plt.rcParams['font.family'] = 'Arial'
+plt.rcParams['lines.linewidth'] = 2
+plt.rcParams['lines.markersize'] = 4.0
+
+plt.rcParams['axes.linewidth'] = 2.0
+
+# Tick Setting
+plt.rcParams['xtick.direction'] = 'in'
+plt.rcParams['ytick.direction'] = 'in'
+plt.rcParams['xtick.top'] = True
+plt.rcParams['ytick.right'] = True
+
+plt.rcParams['xtick.major.size'] = 10
+plt.rcParams['xtick.major.width'] = 2.0
+plt.rcParams['ytick.major.size'] = 10
+plt.rcParams['ytick.major.width'] = 2.0
+
+plt.rcParams['xtick.minor.visible'] = True
+plt.rcParams['xtick.minor.size'] = 5
+plt.rcParams['xtick.minor.width'] = 1.5
+plt.rcParams['ytick.minor.visible'] = True
+plt.rcParams['ytick.minor.size'] = 5
+plt.rcParams['ytick.minor.width'] = 1.5
+plt.xlabel("Number of features selected")
+plt.ylabel("Cross validation score (r2)")
+plt.plot(range(in_features_to_select,
+               len(selector.grid_scores_) + in_features_to_select),
+         selector.grid_scores_)
+plt.ylim(0,1)
 plt.savefig("gurafu4.png")
 
 
-'''
+
+Xnew_train , Xnew_test, ynew_train, ynew_test = train_test_split(X_new, y, train_size=0.6, random_state=123)
+
+
+param_grid ={'n_estimators':[600,800,1000],'max_depth':[2,4,6],'min_data_in_leaf':[5,10,15], 'num_leaves':[4,6,8],'learning_rate':[0.1,0.2,0.3]}
+
+forest_grid1 = GridSearchCV(lgb.LGBMRegressor(objective='regression',
+                        num_leaves = 31),
+                 param_grid = param_grid,   
+                 scoring="r2",  #metrics
+                 cv = 5,              #cross-validation
+                 n_jobs = 1)          #number of core
+
+forest_grid1.fit(X_train,y_train) #fit
+result1 = forest_grid1.predict(X_test)
+MSE1=mean_squared_error(ynew_test, result1)
+R21=r2_score(ynew_test,result1)
+print(MSE1,R21)
+forest_grid_best = forest_grid1.best_estimator_ #best estimator
+print("Best Model Parameter: ",forest_grid1.best_params_)
+
+forest_grid2 = GridSearchCV(lgb.LGBMRegressor(objective='regression',
+                        num_leaves = 31),
+                 param_grid = param_grid,   
+                 scoring="r2",  #metrics
+                 cv = 5,              #cross-validation
+                 n_jobs = 1)          #number of core
+
+forest_grid2.fit(Xnew_train, ynew_train) #fit
+result2 = forest_grid2.predict(Xnew_test)
+MSE2=mean_squared_error(ynew_test, result2)
+R22=r2_score(ynew_test,result2)
+print(MSE2,R22)
+forest_grid_best = forest_grid2.best_estimator_ #best estimator
+print("Best Model Parameter: ",forest_grid2.best_params_)
+
+
+print(MSE1,R21)
+print(MSE2,R22)

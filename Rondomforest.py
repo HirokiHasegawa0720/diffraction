@@ -111,6 +111,11 @@ plt.savefig("gurafu1.png")
 
 
 
+
+
+
+
+
 rf2 = RandomForestRegressor(n_estimators=100,
                                 random_state=42)
 
@@ -171,7 +176,7 @@ X_new = pd.DataFrame(selector.fit_transform(X, y),
                      columns=X.columns.values[selector.get_support()])
 result = pd.DataFrame(selector.get_support(), index=X.columns.values, columns=['False: dropped'])
 result['ranking'] = selector.ranking_
-print(result)
+print(X_new.columns )
 
 
 Xnew_train , Xnew_test, ynew_train, ynew_test = train_test_split(X_new, y, train_size=0.6, random_state=123)
