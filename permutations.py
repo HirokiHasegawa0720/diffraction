@@ -144,7 +144,7 @@ plt.savefig("gurafu5.png")
 
 
 
-
+'''
 ## 11parameters
 #######################################################
 
@@ -233,7 +233,7 @@ plt.title("Permutation Importance")
 plt.tight_layout()
 plt.savefig("gurafu6.png")
 
-
+'''
 
 
 
