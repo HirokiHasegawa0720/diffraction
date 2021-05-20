@@ -35,7 +35,7 @@ class Predata:
             LR.append(self.lr(P[i],Coefficienta[i]))
         return P,LR
 
-n=100
+n=10
 
 p1 = Predata(n)
 Coefficienta = p1.many(df['Coefficienta'])
@@ -446,9 +446,9 @@ for i in range(len(Coefficienta)):
 dfs['p0[bar]']=p0
 dfs['T0[K]']=T0
 dfs['H0[KJ/kg]']=H0
-dfs['M0kg/kmol']=M0kgkmol
-dfs['gamma_0']=gamma0
-dfs['SonicVelocity_0[m/s]']=SonicVelocity0
+dfs['M0[kg/kmol]']=M0kgkmol
+dfs['γ0[-]']=gamma0
+dfs['a0[m/s]']=SonicVelocity0
 dfs['U0[m/s]']=U0ms
 dfs['rho0[kg/m^3]']=rho0
 dfs['U0[kg/kj]']=U0kgkj
@@ -466,32 +466,32 @@ dfs['Gvn[KJ/kg]']=Gvn
 dfs['Svn[KJ/kg K]']=Svn
 dfs['Mvn[kg/kmol]']=Mvnkgkmol
 dfs['Cpvn[KJ/kg K]']=Cpvn
-dfs['gammavn']=gammavn
-dfs['SonicVelocityvn[m/s]']=SonicVelocityvn
+dfs['γvn[-]']=gammavn
+dfs['avn[m/s]']=SonicVelocityvn
 dfs['Pvn/P0']=PvnP0
 dfs['Tvn/Tc']=TvnTc
 dfs['Mvn[kg/kmol]/M0[kg/kmol]']=MvnM0
 dfs['rhovn/rho0']=rhovnrho0
 dfs['V_vn[m/s]']=V_vn
 
-dfs['p_CJ[bar]']=pcj
-dfs['T_CJ[K]']=Tcj
-dfs['rho_CJ[kg/m^3]']=rhocj
-dfs['H_CJ[KJ/kg]']=Hcj
-dfs['U_CJ[KJ/kg]']=Ucj
-dfs['G_CJ[KJ/kg]']=Gcj
-dfs['S_CJ[KJ/kg K]']=Scj
-dfs['M_CJkg/kmol']=Mcjkgkmol
-dfs['(dLV/dLP)t_CJ']=dLVdLPcj
-dfs['(dLV/dLT)p_CJ']=dLVdLTcj
-dfs['Cp_CJ[KJ/kg K]']=Cpcj
-dfs['gamma_CJ']=gammacj
-dfs['SonicVelocity_CJ[m/s]']=SonicVelocitycj
+dfs['pcj[bar]']=pcj
+dfs['Tcj[K]']=Tcj
+dfs['rhocj[kg/m^3]']=rhocj
+dfs['Hcj[KJ/kg]']=Hcj
+dfs['Ucj[KJ/kg]']=Ucj
+dfs['Gcj[KJ/kg]']=Gcj
+dfs['Scj[KJ/kg K]']=Scj
+dfs['Mcj[kg/kmol]']=Mcjkgkmol
+dfs['(dLV/dLP)tcj']=dLVdLPcj
+dfs['(dLV/dLT)pcj']=dLVdLTcj
+dfs['Cpcj[KJ/kg K]']=Cpcj
+dfs['γcj[-]']=gammacj
+dfs['acj[m/s]']=SonicVelocitycj
 dfs['p_CJ/p0']=ppccj
 dfs['T_CJ/T0']=TTccj
 dfs['M_CJ/M0']=MMccj
 dfs['rho_CJ/rho0']=rhorhoccj
-dfs['M_CJ']=MCJ
-dfs['V_CJ[m/s]']=VCJ
+dfs['Mcj[-]']=MCJ
+dfs['Vcj[m/s]']=VCJ
 
-dfs.to_excel('/mnt/c/CEA/all_mixture.xlsx')
+dfs.to_excel('all_mixture.xlsx')

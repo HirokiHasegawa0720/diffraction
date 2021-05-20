@@ -12,18 +12,17 @@ from sklearn.feature_selection import mutual_info_regression
 from sklearn.feature_selection import SelectKBest, SelectPercentile
 import seaborn as sns
 
-df = pd.read_excel('/mnt/c/CEA/all_mixture.xlsx')
+df = pd.read_excel('all_mixture.xlsx')
 
-'''
 #相関係数0.9以上の特徴量の削除
 
-l=['p0[bar]', 'H0[KJ/kg]', 'M0kg/kmol', 'gamma_0', 'SonicVelocity_0[m/s]', \
-    'U0[kg/kj]','SonicVelocity0[m/s]',\
-        'p_CJ[bar]', 'T_CJ[K]', 'H_CJ[KJ/kg]', 'U_CJ[KJ/kg]',\
-                    'M_CJkg/kmol', 'gamma_CJ', 'SonicVelocity_CJ[m/s]',\
-                         'M_CJ', 'V_CJ[m/s]',\
-        'Uvn[m/s]','Pvn[bar]', 'Tvn[K]', 'Hvn[KJ/kg]', 'Uvn[KJ/kg]',\
-                      'gammavn','SonicVelocityvn[m/s]', \
+
+l=['p0[bar]', 'H0[KJ/kg]', 'M0[kg/kmol]', 'γ0[-]', 'a0[m/s]', \
+        'pcj[bar]', 'Tcj[K]', 'Hcj[KJ/kg]',\
+                    'Mcj[kg/kmol]', 'γcj[-]', 'acj[m/s]',\
+                         'Mcj[-]', 'Vcj[m/s]',\
+        'Pvn[bar]', 'Tvn[K]', 'Hvn[KJ/kg]', \
+                      'γvn[-]','avn[m/s]', \
                         ]
 
 
@@ -41,15 +40,17 @@ X_train, X_test, y_train, y_test = train_test_split(x, y, train_size=0.6, random
 dfss=dfs
 dfss['reflection']=df['LR']
 
-g = sns.pairplot(dfss)
-plt.savefig("sns.png")
-
 threshold = 0.9
 
 feat_corr = set()
 corr_matrix = X_train.corr()
 
-corr_matrix.to_excel('/mnt/c/CEA/matrix4.xlsx')
+print(corr_matrix)
+print(1)
+
+
+corr_matrix.to_excel('matrix1.xlsx')
+
 
 for i in range(len(corr_matrix.columns)):
     z=0
@@ -69,15 +70,18 @@ for i in range(len(corr_matrix.columns)):
             corr_matrix.iloc[j,i]=0
         
 
-print(corr_matrix)
+#print(corr_matrix)
 X_train.drop(labels=feat_corr, axis='columns', inplace=True)
 X_test.drop(labels=feat_corr, axis='columns', inplace=True)
 print(X_train.columns)
 print(len(X_train.columns))
 
 
-corr_matrix.to_excel('/mnt/c/CEA/matrix3.xlsx')
-'''
+corr_matrix.to_excel('matrix2.xlsx')
+
+
+
+
 
 '''
 MI = mutual_info_regression(X_train, y_train)
@@ -104,7 +108,7 @@ percentile_sel_ = SelectPercentile(mutual_info_regression, percentile=10)
 print(len(percentile_sel_.get_support()))
 print(percentile_sel_)
 
-'''
+
 
 
 #機械学習の結果の解析
@@ -145,14 +149,8 @@ for i in range(len(l)):
     df53=df51[(df51['物理量1'] == l[i]) | (df51['物理量2'] == l[i]) | (df51['物理量3'] == l[i]) | (df51['物理量4'] == l[i]) | (df51['物理量5'] == l[i])]
     df54=df52[(df52['物理量1'] == l[i]) | (df52['物理量2'] == l[i]) | (df52['物理量3'] == l[i]) | (df52['物理量4'] == l[i]) | (df52['物理量5'] == l[i])]
     params5=(len(df53)/(len(df53)+len(df54)))
-    '''
-    df61=df6[df6['R2'] > 0.95]
-    df62=df6[df6['R2'] < 0.95]
-    df63=df61[(df61['物理量1'] == l[i]) | (df61['物理量2'] == l[i]) | (df61['物理量3'] == l[i]) | (df61['物理量4'] == l[i]) | (df61['物理量5'] == l[i]) | (df61['物理量6'] == l[i])]
-    df64=df62[(df62['物理量1'] == l[i]) | (df62['物理量2'] == l[i]) | (df62['物理量3'] == l[i]) | (df62['物理量4'] == l[i]) | (df62['物理量5'] == l[i]) | (df62['物理量6'] == l[i])]
-    params6=(len(df63)/(len(df63)+len(df64)))
-    '''
-    
+
+
     probability=[params2,params3,params4,params5]
     dfs[l[i]]=probability
     
@@ -338,3 +336,4 @@ plt.ylabel("log(MSE)[$mm^{2}$]", fontsize=20)
 plt.savefig("MSE.png")
 plt.show()
 
+'''

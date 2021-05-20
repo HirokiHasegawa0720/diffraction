@@ -12,7 +12,7 @@ def seikika(h):
     h1=np.array(h)
     return list(((h1)-minh)/(maxh-minh))
 
-df = pd.read_excel('all_mixture1.xlsx')
+df = pd.read_excel('all_mixture.xlsx')
 
 output=df['LR'] #output= Coefficienta or LR
 
@@ -31,7 +31,14 @@ class neural:
         self.n =n
 
     def testdataxy(self,test,a):
-        test = test[a*self.n:(a+1)*self.n]
+        b=test.index.values
+        c=[]
+        for i in range(len(b)):
+            if a*self.n<= b[i] <(a+1)*self.n:
+                pass
+            else:
+                c.append(i)
+        test = test.drop(test.index[c])
         return test
 
     def tranning(self,l,nn,df,output):
@@ -99,6 +106,7 @@ class neural:
             sol=['adam']
             act=['relu']
             hidd=[]
+            '''
             for i in [2,4,6]:
                 for j in [100,200,300]:
                     b=[j]*i
@@ -107,13 +115,18 @@ class neural:
             alp=[ 1e-7,1e-4,1e-1]
             param_grid = {'solver':sol,'activation':act,'hidden_layer_sizes':hidd,'alpha':alp}
             grid = GridSearchCV(MLPRegressor(),param_grid,cv=3)
+            '''
+            hidd=[(2),(3)]
+            alp=[ 1e-7]
+            param_grid = {'solver':sol,'activation':act,'hidden_layer_sizes':hidd,'alpha':alp}
+            grid=GridSearchCV(MLPRegressor(),param_grid,cv=2)
             grid.fit(x_trains,y_trains)
             for j in [4,10,15,22,27,30,32,35,36,37,38,39]:
-                x_tests = self.testdataxy(x_tests,j)
-                y_tests = self.testdataxy(y_tests,j)
-                results=grid.predict(x_tests)
-                MSE=mean_squared_error(y_tests, results)
-                R2=r2_score(y_tests,results)
+                x_test = self.testdataxy(x_tests,j)
+                y_test = self.testdataxy(y_tests,j)
+                result=grid.predict(x_test)
+                MSE=mean_squared_error(y_test, result)
+                R2=r2_score(y_test,result)
                 AA.append(MSE)
                 BB.append(R2)
                 bestparms.append(grid.best_params_)
@@ -133,7 +146,7 @@ class neural:
                 dfss.loc[i]=[ll[0],ll[1],ll[2],ll[3],ll[4],A,B,bastparam,AAA,BBB,AA[0],AA[1],AA[2],AA[3],AA[4],AA[5],AA[6],AA[7],AA[8],AA[9],AA[10],AA[11],BB[0],BB[1],BB[2],BB[3],BB[4],BB[5],BB[6],BB[7],BB[8],BB[9],BB[10],BB[11]]
             if nn == 6:
                 dfss.loc[i]=[ll[0],ll[1],ll[2],ll[3],ll[4],ll[5],A,B,bastparam,AAA,BBB,AA[0],AA[1],AA[2],AA[3],AA[4],AA[5],AA[6],AA[7],AA[8],AA[9],AA[10],AA[11],BB[0],BB[1],BB[2],BB[3],BB[4],BB[5],BB[6],BB[7],BB[8],BB[9],BB[10],BB[11]]
-
+            print(dfss)
 
         dfss=dfss.sort_values('R2', ascending=False)
         return dfss
@@ -144,7 +157,7 @@ p1 = neural(n)
 
 
 df2 = p1.tranning(l,2,df,output)
-df2.to_excel('params2.xlsx')
+df2.to_excel('param2.xlsx')
 
 df3 = p1.tranning(l,3,df,output)
 df3.to_excel('params3.xlsx')
