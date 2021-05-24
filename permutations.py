@@ -1,5 +1,4 @@
-from sklearn.inspection import permutation_importance
-from sklearn.ensemble import RandomForestRegressor
+
 from sklearn.inspection import permutation_importance
 from sklearn.model_selection import KFold, StratifiedKFold, GridSearchCV, train_test_split,cross_val_score
 from sklearn.metrics import mean_squared_error, roc_auc_score, r2_score
@@ -51,7 +50,7 @@ def splitmixture(dfs,a,n):
 
 
 df = pd.read_excel('all_mixture.xlsx')
-
+'''
 
 l=['p0[bar]', 'H0[KJ/kg]', 'M0[kg/kmol]', 'γ0[-]', 'a0[m/s]', \
         'pcj[bar]', 'Tcj[K]', 'Hcj[KJ/kg]',\
@@ -60,6 +59,11 @@ l=['p0[bar]', 'H0[KJ/kg]', 'M0[kg/kmol]', 'γ0[-]', 'a0[m/s]', \
         'Pvn[bar]', 'Tvn[K]', 'Hvn[KJ/kg]', \
                       'γvn[-]','avn[m/s]', \
                         ]
+
+'''
+
+l=['p0[bar]', 'H0[KJ/kg]', 'M0[kg/kmol]', 'γ0[-]', 'pcj[bar]', 'Tcj[K]',
+       'Hcj[KJ/kg]', 'Mcj[kg/kmol]', 'γcj[-]', 'Mcj[-]', 'Tvn[K]']
 
 dfs = pd.DataFrame({'p0[bar]':df['p0[bar]']})
 
@@ -71,6 +75,8 @@ for i in range(len(l)):
 
 dfs['LR']=df['LR']
 
+
+
 dfs_train=splitmixture(dfs,a,n)[0]
 dfs_test=splitmixture(dfs,a,n)[1]
 
@@ -81,7 +87,6 @@ y_train =  dfs_train['LR']
 
 X_test = dfs_test.drop('LR', axis=1)
 y_test = dfs_test['LR']
-
 
 sol=['adam']
 act=['relu']
@@ -106,7 +111,8 @@ print('Best cross-validation: {}'.format(grid.best_score_))
 
 
 
-result = permutation_importance(grid, X_test, y_test, n_repeats=5, random_state=42)
+
+result = permutation_importance(grid,X_train,y_train, n_repeats=5, random_state=42)
 
 
 df_importance = pd.DataFrame(zip(X_train.columns, result["importances"].mean(axis=1)),columns=["feature","importance"])
@@ -139,7 +145,6 @@ plot_feature_importance(df_importance)
 plt.title("Permutation Importance")
 plt.tight_layout()
 plt.savefig("gurafu5.png")
-
 
 
 
