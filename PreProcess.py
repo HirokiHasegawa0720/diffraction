@@ -28,15 +28,17 @@ class Predata:
     def manyPLR(self,Coefficienta):
         P=[]
         LR=[]
-        for i in range(len(Coefficienta)):
-            randomp = random.uniform(10,100)
-            P.append(randomp)
+        P=[10.0,20.0,30.0,40.0,50.0,60.0,70.0,80.0,90.0,100.0]*40
         for i in range(len(Coefficienta)):
             LR.append(self.lr(P[i],Coefficienta[i]))
         return P,LR
-
+#randomp = random.uniform(10,100)
 n=10
-
+'''
+ for i in range(len(Coefficienta)):
+            randomp = random.uniform(10,100)
+            P.append(randomp)
+'''
 p1 = Predata(n)
 Coefficienta = p1.many(df['Coefficienta'])
 Equivalentratio = p1.many(df['Equivalentratio'])
@@ -55,6 +57,7 @@ diluent_ratio3 = p1.many(df['diluent_ratio3'])
 
 PLR = p1.manyPLR(Coefficienta)
 
+print(len(Coefficienta))
 
 P = PLR[0]
 LR = PLR[1]
