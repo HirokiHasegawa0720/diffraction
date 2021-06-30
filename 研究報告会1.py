@@ -24,8 +24,7 @@ l=['p0[bar]', 'H0[KJ/kg]', 'M0[kg/kmol]', 'γ0[-]', 'a0[m/s]', \
                          'Mcj[-]', 'Vcj[m/s]',\
         'Pvn[bar]', 'Tvn[K]', 'Hvn[KJ/kg]', \
                       'γvn[-]','avn[m/s]', \
-                        ]
-
+                    ]
 
 dfs = pd.DataFrame({'p0[bar]':df[l[0]]})
 
@@ -155,10 +154,18 @@ X_test2 = dfs_test.drop('LR', axis=1)
 y_test2 = dfs_test['LR']
 
 X_train, X_test1, y_train, y_test1 = train_test_split(X_val , y_val, train_size=0.6, random_state=123)
+'''
+
+print(X_train)
+
+X_train = X_train.sort_index()
+y_train = y_train.sort_index()
+
 
 print(X_train)
 
 '''
+
 mms = MinMaxScaler()
 ss = StandardScaler()
 
@@ -168,7 +175,6 @@ sX_test1 = ss.transform(X_test1)
 
 sX_test2 = ss.fit_transform(X_test2)
 
-'''
 
 
 #MSE vs エポック
@@ -593,7 +599,8 @@ plt.rcParams['axes.linewidth'] = 2.0
 
 plt.rcParams['xtick.direction'] = 'in'
 plt.rcParams['ytick.direction'] = 'in'
-plt.rcParams['xtick.top'] = True
+plt.rcParams['xtick.top'] = False
+plt.rcParams["xtick.bottom"] = False  
 plt.rcParams['ytick.right'] = True
 
 plt.rcParams['xtick.major.size'] = 10
@@ -601,7 +608,7 @@ plt.rcParams['xtick.major.width'] = 2.0
 plt.rcParams['ytick.major.size'] = 10
 plt.rcParams['ytick.major.width'] = 2.0
 
-plt.rcParams['xtick.minor.visible'] = True
+plt.rcParams['xtick.minor.visible'] = False
 plt.rcParams['xtick.minor.size'] = 5
 plt.rcParams['xtick.minor.width'] = 1.5
 plt.rcParams['ytick.minor.visible'] = True
@@ -611,14 +618,17 @@ plt.rcParams['ytick.minor.width'] = 1.5
 
 
 tree_disp = plot_partial_dependence(estimator1, X_train, ['p0[bar]'],line_kw={"label": "Neural Network"})
+'''
 mlp_disp = plot_partial_dependence(estimator2, X_train, ['p0[bar]'],
                                    ax=tree_disp.axes_,
                                    line_kw={"label": "Random forest","color": "red"})
+'''
 plt.tight_layout()
 plt.savefig("gurafu11(研究報告).png")
 
 
 plt.figure(figsize=(8,8))
+
 
 plt.rcParams['font.size'] = 18
 plt.rcParams['font.family'] = 'Arial'
@@ -629,7 +639,8 @@ plt.rcParams['axes.linewidth'] = 2.0
 
 plt.rcParams['xtick.direction'] = 'in'
 plt.rcParams['ytick.direction'] = 'in'
-plt.rcParams['xtick.top'] = True
+plt.rcParams['xtick.top'] = False
+plt.rcParams["xtick.bottom"] = False  
 plt.rcParams['ytick.right'] = True
 
 plt.rcParams['xtick.major.size'] = 10
@@ -637,7 +648,7 @@ plt.rcParams['xtick.major.width'] = 2.0
 plt.rcParams['ytick.major.size'] = 10
 plt.rcParams['ytick.major.width'] = 2.0
 
-plt.rcParams['xtick.minor.visible'] = True
+plt.rcParams['xtick.minor.visible'] = False
 plt.rcParams['xtick.minor.size'] = 5
 plt.rcParams['xtick.minor.width'] = 1.5
 plt.rcParams['ytick.minor.visible'] = True
@@ -646,10 +657,11 @@ plt.rcParams['ytick.minor.width'] = 1.5
 
 
 tree_disp = plot_partial_dependence(estimator1, X_train, ['Tcj[K]'],line_kw={"label": "Neural Network"})
+'''
 mlp_disp = plot_partial_dependence(estimator2, X_train, ['Tcj[K]'],
                                    ax=tree_disp.axes_,
                                    line_kw={"label": "Random forest","color": "red"})
-
+'''
 plt.tight_layout()
 plt.savefig("gurafu12(研究報告).png")
 
