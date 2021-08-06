@@ -14,7 +14,7 @@ import seaborn as sns
 from sklearn.model_selection import learning_curve
 from sklearn.ensemble import RandomForestRegressor
 
-df = pd.read_excel('all_mixture.xlsx')
+df = pd.read_excel('/mnt/c/CEA/all_mixture.xlsx')
 
 #3.1　特徴量の削減
 
@@ -23,8 +23,8 @@ l=['p0[bar]', 'H0[KJ/kg]', 'M0[kg/kmol]', 'γ0[-]', 'a0[m/s]', \
                     'Mcj[kg/kmol]', 'γcj[-]', 'acj[m/s]',\
                          'Mcj[-]', 'Vcj[m/s]',\
         'Pvn[bar]', 'Tvn[K]', 'Hvn[KJ/kg]', \
-                      'γvn[-]','avn[m/s]', \
-                    ]
+                      'γvn[-]','avn[m/s]',\
+                    'VISCMILLIPOISEvn','CONDUCTIVITYvn','PRANDTLNUMBERvn','VISCMILLIPOISECJ','CONDUCTIVITYCJ','PRANDTLNUMBERCJ']
 
 dfs = pd.DataFrame({'p0[bar]':df[l[0]]})
 
@@ -43,7 +43,7 @@ threshold = 0.8
 
 feat_corr = set()
 corr_matrix = X_train.corr()
-corr_matrix.to_excel('matrix1.xlsx')
+corr_matrix.to_excel('/mnt/c/CEA/matrix1.xlsx')
 plt.figure()
 sns.heatmap(corr_matrix,cmap='viridis')
 plt.tight_layout()
@@ -72,7 +72,7 @@ X_test.drop(labels=feat_corr, axis='columns', inplace=True)
 print(X_train.columns)
 print(len(X_train.columns))
 
-corr_matrix.to_excel('matrix2.xlsx')
+corr_matrix.to_excel('/mnt/c/CEA/matrix2.xlsx')
 
 
 
@@ -121,7 +121,7 @@ def plot_feature_importance(df):
 #33,34
 
 n=10  #1つの混合気あたりのデータ点数
-a=34  #C2H4/O2,AR50
+a=28  #C2H4/O2,AR50
 
 
 def splitmixture1(dfs,a,n):
@@ -129,11 +129,15 @@ def splitmixture1(dfs,a,n):
         test = dfs[a*n:(a+1)*n]
         return train,test
 
-df = pd.read_excel('all_mixture.xlsx')
-
+df = pd.read_excel('/mnt/c/CEA/all_mixture.xlsx')
 
 l=['p0[bar]', 'H0[KJ/kg]', 'M0[kg/kmol]', 'γ0[-]', 'Tcj[K]', 'γcj[-]',
        'Mcj[-]']
+
+'''
+l=['p0[bar]', 'H0[KJ/kg]', 'M0[kg/kmol]', 'γ0[-]', 'pcj[bar]', 'Tcj[K]',
+       'γcj[-]', 'Mcj[-]', 'VISCMILLIPOISECJ', 'PRANDTLNUMBERCJ']
+'''
 
 dfs = pd.DataFrame({'p0[bar]':df['p0[bar]']})
 
@@ -184,7 +188,7 @@ act=['relu']
 hidd=[(200,200,200,200)]
 #bach=[30]
 
-for i in [4,6,8]:
+for i in [2,4,6]:
     for j in [100,150,200]:
         b=[j]*i
         b=tuple(b)

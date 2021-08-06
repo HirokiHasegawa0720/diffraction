@@ -16,8 +16,8 @@ import lightgbm as lgb #LightGBM
 import IPython
 from sklearn.feature_selection import RFE, RFECV
 from sklearn.model_selection import GridSearchCV
-
-
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.neural_network import MLPRegressor
 
 def seikika(h):
     minh = min(h)
@@ -41,11 +41,29 @@ def plot_feature_importance(df):
     plt.xlabel('Feature importance')
     plt.ylabel('Feature')
 
-df = pd.read_excel('/mnt/c/CEA/all_mixture.xlsx')
 
-output=df['LR']
+#33,34
 
-l=['p0[bar]', 'H0[KJ/kg]', 'M0kg/kmol', 'gamma_0','p_CJ[bar]', 'T_CJ[K]', 'H_CJ[KJ/kg]', 'M_CJkg/kmol', 'gamma_CJ','M_CJ', 'Tvn[K]']
+n=10  #1つの混合気あたりのデータ点数
+a=34  #C2H4/O2,AR50
+
+
+def splitmixture(dfs,a,n):
+        train = dfs.drop(range(a*n,(a+1)*n))
+        test = dfs[a*n:(a+1)*n]
+        return train,test
+
+
+
+## allparameters
+#######################################################
+
+
+df = pd.read_excel('all_mixture.xlsx')
+
+
+l=['p0[bar]', 'H0[KJ/kg]', 'M0[kg/kmol]', 'γ0[-]', 'pcj[bar]', 'Tcj[K]',
+       'Hcj[KJ/kg]', 'Mcj[kg/kmol]', 'γcj[-]', 'Mcj[-]', 'Tvn[K]']
 
 dfs = pd.DataFrame({'p0[bar]':df['p0[bar]']})
 
@@ -53,18 +71,25 @@ for i in range(len(l)):
     params=seikika(df[l[i]])
     dfs[l[i]]=params
 
+dfs=dfs.rename(columns={'p0[bar]': 'p0', 'H0[KJ/kg]': 'H0','M0[kg/kmol]': 'M0','γ0[-]': 'γ0','pcj[bar]': 'pCJ', 'Tcj[K]': 'TCJ', 'Hcj[KJ/kg]': 'HCJ',  'Mcj[kg/kmol]': 'MCJ', 'γcj[-]': 'γCJ', 'Mcj[-]': 'M_CJ','Tvn[K]': 'Tvn'})
 
+dfs['LR']=df['LR']
 
-dfs=dfs.rename(columns={'p0[bar]': 'p0', 'H0[KJ/kg]': 'H0','M0kg/kmol': 'M0','gamma_0': 'γ0','p_CJ[bar]': 'pCJ', 'T_CJ[K]': 'TCJ', 'H_CJ[KJ/kg]': 'HCJ',  'M_CJkg/kmol': 'MCJ', 'gamma_CJ': 'γCJ', 'M_CJ': 'M_CJ','Tvn[K]': 'Tvn'})
+dfs_train=splitmixture(dfs,a,n)[0]
+dfs_test=splitmixture(dfs,a,n)[1]
 
-X = dfs
-y = output
+dfs_train = dfs_train.sample(frac=1).reset_index(drop=True)
 
+X_train = dfs_train.drop('LR', axis=1)
+y_train =  dfs_train['LR']
 
-X_train , X_test, y_train, y_test = train_test_split(X, y, train_size=0.6, random_state=123)
+X_test = dfs_test.drop('LR', axis=1)
+y_test = dfs_test['LR']
 
-print(dfs)
+X=dfs.drop('LR', axis=1)
+y=dfs['LR']
 
+#X_train , X_test, y_train, y_test = train_test_split(X, y, train_size=0.6, random_state=123)
 
 #lightgbm
 
@@ -127,15 +152,10 @@ gbm_reg2 = lgb.LGBMRegressor(objective='regression',
                         n_estimators=100)
 
 in_features_to_select = 1
-selector = RFECV(gbm_reg2 , min_features_to_select=in_features_to_select, cv=5,scoring='r2')
-selector = selector.fit(X ,  y)
-X_new = pd.DataFrame(selector.fit_transform(X, y), 
-                     columns=X.columns.values[selector.get_support()])
+selector = RFECV(gbm_reg2 , min_features_to_select=in_features_to_select, cv=3,scoring='r2')
+selector = selector.fit(X_train, y_train)
 
-print(X_new.columns)
-
-result = pd.DataFrame(selector.get_support(), index=X.columns.values, columns=['False: dropped'])
-result['ranking'] = selector.ranking_
+print(selector.grid_scores_)
 
 plt.figure(figsize=(6,5))
 
@@ -170,44 +190,117 @@ plt.plot(range(in_features_to_select,
          selector.grid_scores_)
 plt.ylim(0,1)
 plt.savefig("gurafu4.png")
+print(selector.grid_scores_)
+
+X_new = pd.DataFrame(selector.fit_transform(X, y), 
+                     columns=X.columns.values[selector.get_support()])
+
+print(X_new.columns)
+
+result = pd.DataFrame(selector.get_support(), index=X.columns.values, columns=['False: dropped'])
+result['ranking'] = selector.ranking_
+     
+
+#all parameters
 
 
+d = {'model(parameter)':['1'] , 'MSE':[0],'R2':[0]}
+dfsss = pd.DataFrame(d,columns=['model(parameter)','MSE','R2'])
+#7
 
-Xnew_train , Xnew_test, ynew_train, ynew_test = train_test_split(X_new, y, train_size=0.6, random_state=123)
+print('lightgbm')
 
+#param_grid ={'n_estimators':[600,800,1000],'max_depth':[2,4,6],'min_data_in_leaf':[5,10,15], 'num_leaves':[4,6,8],'learning_rate':[0.1,0.2,0.3]}
+param_grid ={'n_estimators':[100,500,100],'max_depth':[2,4,6]}
 
-param_grid ={'n_estimators':[600,800,1000],'max_depth':[2,4,6],'min_data_in_leaf':[5,10,15], 'num_leaves':[4,6,8],'learning_rate':[0.1,0.2,0.3]}
-
-forest_grid1 = GridSearchCV(lgb.LGBMRegressor(objective='regression',
+forest_grid = GridSearchCV(lgb.LGBMRegressor(objective='regression',
                         num_leaves = 31),
                  param_grid = param_grid,   
                  scoring="r2",  #metrics
-                 cv = 5,              #cross-validation
-                 n_jobs = 1)          #number of core
-
-forest_grid1.fit(X_train,y_train) #fit
-result1 = forest_grid1.predict(X_test)
-MSE1=mean_squared_error(ynew_test, result1)
-R21=r2_score(ynew_test,result1)
-print(MSE1,R21)
-forest_grid_best = forest_grid1.best_estimator_ #best estimator
-print("Best Model Parameter: ",forest_grid1.best_params_)
-
-forest_grid2 = GridSearchCV(lgb.LGBMRegressor(objective='regression',
-                        num_leaves = 31),
-                 param_grid = param_grid,   
-                 scoring="r2",  #metrics
-                 cv = 5,              #cross-validation
-                 n_jobs = 1)          #number of core
-
-forest_grid2.fit(Xnew_train, ynew_train) #fit
-result2 = forest_grid2.predict(Xnew_test)
-MSE2=mean_squared_error(ynew_test, result2)
-R22=r2_score(ynew_test,result2)
-print(MSE2,R22)
-forest_grid_best = forest_grid2.best_estimator_ #best estimator
-print("Best Model Parameter: ",forest_grid2.best_params_)
+                 cv = 3)    
 
 
-print(MSE1,R21)
-print(MSE2,R22)
+forest_grid.fit(X_train,y_train) #fit
+result = forest_grid.predict(X_test)
+MSE=mean_squared_error(y_test, result)
+R2=r2_score(y_test,result)
+print(MSE,R2)
+forest_grid_best = forest_grid.best_estimator_ #best estimator
+print("Best Model Parameter: ",forest_grid.best_params_)
+print('Best cross-validation: {}'.format(forest_grid.best_score_))
+
+dfsss.loc[0]=['lightgbm(All)',MSE,R2]
+
+print('mlp')
+
+sol=['adam']
+act=['relu']
+hidd=[]
+for i in [2,4,6]:
+    for j in [50,100,150]:
+        b=[j]*i
+        b=tuple(b)
+        hidd.append(b)
+alp=[1-4,1e-2,1e+0]
+param_grid = {'solver':sol,'activation':act,'hidden_layer_sizes':hidd,'alpha':alp}
+grid=GridSearchCV(MLPRegressor(),param_grid,cv=3)
+grid.fit(X_train,y_train)
+result=grid.predict(X_test)
+MSE=mean_squared_error(y_test, result)
+R2=r2_score(y_test,result)
+print(MSE,R2)
+print('Best parameters: {}'.format(grid.best_params_))
+print('Best cross-validation: {}'.format(grid.best_score_))
+
+dfsss.loc[1]=['MLPRegressor(All)',MSE,R2]
+
+
+selector = RFE(gbm_reg2, n_features_to_select=6)
+selector = selector.fit(X,  y)
+X_new = pd.DataFrame(selector.fit_transform(X, y), 
+                     columns=X.columns.values[selector.get_support()])
+print(X.columns.values[selector.get_support()])
+
+dfss=X_new
+
+dfss['LR']=y
+
+
+dfss_train=splitmixture(dfss,a,n)[0]
+dfss_test=splitmixture(dfss,a,n)[1]
+
+dfss_train = dfss_train.sample(frac=1).reset_index(drop=True)
+
+Xnew_train = dfss_train.drop('LR', axis=1)
+ynew_train =  dfss_train['LR']
+
+Xnew_test = dfss_test.drop('LR', axis=1)
+ynew_test = dfss_test['LR']
+
+print('lightgbm')
+
+forest_grid.fit(Xnew_train, ynew_train) #fit
+result = forest_grid.predict(Xnew_test)
+MSE=mean_squared_error(ynew_test, result)
+R2=r2_score(ynew_test,result)
+print(MSE,R2)
+forest_grid_best = forest_grid.best_estimator_ #best estimator
+print("Best Model Parameter: ",forest_grid.best_params_)
+print('Best cross-validation: {}'.format(forest_grid.best_score_))
+
+dfsss.loc[2]=['lightgbm(RFE(Romdomforest))',MSE,R2]
+
+
+print('mlp')
+
+grid.fit(Xnew_train, ynew_train)
+result=grid.predict(Xnew_test)
+MSE=mean_squared_error(ynew_test, result)
+R2=r2_score(ynew_test,result)
+print(MSE,R2)
+print('Best parameters: {}'.format(grid.best_params_))
+print('Best cross-validation: {}'.format(grid.best_score_))
+
+dfsss.loc[3]=['MLPRegressor(RFE(Romdomforest))',MSE,R2]
+
+dfsss.to_excel('/mnt/c/CEA/predictions.xlsx')

@@ -15,6 +15,7 @@ import IPython
 from sklearn.feature_selection import RFE, RFECV
 from sklearn.model_selection import GridSearchCV
 from sklearn.neural_network import MLPRegressor
+import lightgbm as lgb 
 
 
 def seikika(h):
@@ -69,76 +70,26 @@ for i in range(len(l)):
     params=seikika(df[l[i]])
     dfs[l[i]]=params
 
-#dfs=dfs.rename(columns={'p0[bar]': 'p0', 'H0[KJ/kg]': 'H0','M0kg/kmol': 'M0','gamma_0': 'γ0','p_CJ[bar]': 'pCJ', 'T_CJ[K]': 'TCJ', 'H_CJ[KJ/kg]': 'HCJ',  'M_CJkg/kmol': 'MCJ', 'gamma_CJ': 'γCJ', 'M_CJ': 'M_CJ','Tvn[K]': 'Tvn'})
+dff=dfs.rename(columns={'p0[bar]': 'p0', 'H0[KJ/kg]': 'H0','M0[kg/kmol]': 'M0','γ0[-]': 'γ0','pcj[bar]': 'pCJ', 'Tcj[K]': 'TCJ', 'Hcj[KJ/kg]': 'HCJ',  'Mcj[kg/kmol]': 'MCJ', 'γcj[-]': 'γCJ', 'Mcj[-]': 'M_CJ','Tvn[K]': 'Tvn'})
 
-dfs['LR']=df['LR']
+dff['LR']=df['LR']
 
-dfs_train=splitmixture(dfs,a,n)[0]
-dfs_test=splitmixture(dfs,a,n)[1]
+dff_train=splitmixture(dff,a,n)[0]
+dff_test=splitmixture(dff,a,n)[1]
 
-dfs_train = dfs_train.sample(frac=1).reset_index(drop=True)
+dff_train = dff_train.sample(frac=1).reset_index(drop=True)
 
-X_train = dfs_train.drop('LR', axis=1)
-y_train =  dfs_train['LR']
+X_train = dff_train.drop('LR', axis=1)
+y_train =  dff_train['LR']
 
-X_test = dfs_test.drop('LR', axis=1)
-y_test = dfs_test['LR']
+X_test = dff_test.drop('LR', axis=1)
+y_test = dff_test['LR']
 
-X=dfs.drop('LR', axis=1)
-y=dfs['LR']
-
-#X_train , X_test, y_train, y_test = train_test_split(X, y, train_size=0.6, random_state=123)
+X=dfs
+y=df['LR']
 
 
 #Rondomforest
-
-
-rf1 = RandomForestRegressor(n_estimators=100,
-                                random_state=42)
-
-rf1.fit(X_train, y_train)
-
-# Feature Importances
-fti =  rf1.feature_importances_
-
-print('Feature Importances:')
-for i, feat in enumerate(X_train .columns):
-    print('\t{0:10s} : {1:>12.4f}'.format(feat, fti[i]))
-
-cols = list(X_train .columns)         # 特徴量名のリスト(目的変数CRIM以外)
-f_importance = np.array(fti) # 特徴量重要度の算出
-f_importance = f_importance / np.sum(f_importance)  # 正規化(必要ない場合はコメントアウト)
-df_importance = pd.DataFrame({'feature':cols, 'importance':f_importance})
-df_importance = df_importance.sort_values('importance', ascending=False) # 降順ソート
-
-display(df_importance)
-plt.figure(figsize=(8,5))
-
-plt.rcParams['font.size'] = 18
-plt.rcParams['font.family'] = 'Arial'
-plt.rcParams['lines.linewidth'] = 2
-plt.rcParams['lines.markersize'] = 4.0
-
-plt.rcParams['axes.linewidth'] = 2.0
-
-# Tick Setting
-plt.rcParams['xtick.direction'] = 'in'
-plt.rcParams['xtick.top'] = True
-
-plt.rcParams['xtick.major.size'] = 10
-plt.rcParams['xtick.major.width'] = 2.0
-
-
-plt.rcParams['xtick.minor.visible'] = True
-plt.rcParams['xtick.minor.size'] = 5
-plt.rcParams['xtick.minor.width'] = 1.5
-
-
-plot_feature_importance(df_importance)
-plt.title("Rondomforest")
-plt.tight_layout()
-plt.savefig("gurafu1.png")
-
 
 
 
@@ -177,13 +128,12 @@ plt.rcParams['ytick.minor.size'] = 5
 plt.rcParams['ytick.minor.width'] = 1.5
 plt.xlabel("Number of features selected")
 plt.ylabel("Cross validation score (r2)")
-
-
+plt.title("Rondomforest")
 plt.ylim(0,1)
 plt.plot(range(in_features_to_select,
                len(selector.grid_scores_) + in_features_to_select),
          selector.grid_scores_)
-plt.savefig("gurafu2.png")
+plt.savefig("gurafu1.png")
 
 print(selector.grid_scores_)
 
@@ -296,93 +246,170 @@ print('Best cross-validation: {}'.format(grid.best_score_))
 
 dfsss.loc[3]=['MLPRegressor(RFE(Romdomforest))',MSE,R2]
 
-dfsss.to_excel('/mnt/c/CEA/predictions.xlsx')
 
 
-'''
+## allparameters
+#######################################################
 
-selector = RFE(rf, n_features_to_select=6)
+
+
+#l=['p0[bar]', 'H0[KJ/kg]', 'M0[kg/kmol]', 'γ0[-]', 'pcj[bar]', 'Tcj[K]',
+#       'Hcj[KJ/kg]', 'Mcj[kg/kmol]', 'γcj[-]', 'Mcj[-]', 'Tvn[K]']
+
+
+#lightgbm
+
+
+
+gbm_reg2 = lgb.LGBMRegressor(objective='regression',
+                        num_leaves = 31,
+                        n_estimators=100)
+
+in_features_to_select = 1
+selector = RFECV(gbm_reg2 , min_features_to_select=in_features_to_select, cv=3,scoring='r2')
+selector = selector.fit(X_train, y_train)
+
+print(selector.grid_scores_)
+
+plt.figure(figsize=(6,5))
+
+plt.rcParams['font.size'] = 18
+plt.rcParams['font.family'] = 'Arial'
+plt.rcParams['lines.linewidth'] = 2
+plt.rcParams['lines.markersize'] = 4.0
+
+plt.rcParams['axes.linewidth'] = 2.0
+
+# Tick Setting
+plt.rcParams['xtick.direction'] = 'in'
+plt.rcParams['ytick.direction'] = 'in'
+plt.rcParams['xtick.top'] = True
+plt.rcParams['ytick.right'] = True
+
+plt.rcParams['xtick.major.size'] = 10
+plt.rcParams['xtick.major.width'] = 2.0
+plt.rcParams['ytick.major.size'] = 10
+plt.rcParams['ytick.major.width'] = 2.0
+
+plt.rcParams['xtick.minor.visible'] = True
+plt.rcParams['xtick.minor.size'] = 5
+plt.rcParams['xtick.minor.width'] = 1.5
+plt.rcParams['ytick.minor.visible'] = True
+plt.rcParams['ytick.minor.size'] = 5
+plt.rcParams['ytick.minor.width'] = 1.5
+plt.xlabel("Number of features selected")
+plt.ylabel("Cross validation score (r2)")
+plt.plot(range(in_features_to_select,
+               len(selector.grid_scores_) + in_features_to_select),
+         selector.grid_scores_)
+plt.ylim(0,1)
+plt.title("Lightgbm")
+plt.savefig("gurafu2.png")
+print(selector.grid_scores_)
 
 X_new = pd.DataFrame(selector.fit_transform(X, y), 
                      columns=X.columns.values[selector.get_support()])
-result = pd.DataFrame(selector.get_support(), index=X.columns.values, columns=['False: dropped'])
-result['ranking'] = selector.ranking_
-print(result)
+
+print(X_new.columns)
 
 
+#all parameters
 
-RFclf = RandomForestRegressor(n_estimators=100)
+#7
 
-	
-model = RFclf.fit(X_train, y_train)
+print('lightgbm')
 
-predicted = model.predict(X_test)
+#param_grid ={'n_estimators':[600,800,1000],'max_depth':[2,4,6],'min_data_in_leaf':[5,10,15], 'num_leaves':[4,6,8],'learning_rate':[0.1,0.2,0.3]}
+param_grid ={'n_estimators':[100,500,100],'max_depth':[2,4,6]}
 
-print(predicted)
-
-from sklearn.metrics import mean_squared_error
-from sklearn.metrics import r2_score
- 
-#予測値と正解値を描写する関数
-def True_Pred_map(pred_df):
-    RMSE = np.sqrt(mean_squared_error(pred_df['true'], pred_df['pred']))
-    R2 = r2_score(pred_df['true'], pred_df['pred']) 
-    plt.figure(figsize=(8,8))
-    ax = plt.subplot(111)
-    ax.scatter('true', 'pred', data=pred_df)
-    ax.set_xlabel('True Value', fontsize=15)
-    ax.set_ylabel('Pred Value', fontsize=15)
-    ax.set_xlim(pred_df.min().min()-0.1 , pred_df.max().max()+0.1)
-    ax.set_ylim(pred_df.min().min()-0.1 , pred_df.max().max()+0.1)
-    x = np.linspace(pred_df.min().min()-0.1, pred_df.max().max()+0.1, 2)
-    y = x
-    ax.plot(x,y,'r-')
-    plt.text(0.1, 0.9, 'RMSE = {}'.format(str(round(RMSE, 5))), transform=ax.transAxes, fontsize=15)
-    plt.text(0.1, 0.8, 'R^2 = {}'.format(str(round(R2, 5))), transform=ax.transAxes, fontsize=15)
-
-pred_df = pd.concat([y_test.reset_index(drop=True), pd.Series(predicted)], axis=1)
-pred_df.columns = ['true', 'pred']
-
-pred_df.head()
-
-True_Pred_map(pred_df)
-plt.savefig("gurafu1.png")
+forest_grid = GridSearchCV(lgb.LGBMRegressor(objective='regression',
+                        num_leaves = 31),
+                 param_grid = param_grid,   
+                 scoring="r2",  #metrics
+                 cv = 3)    
 
 
-RMSE_list = []
-count = []
-for i in range(1, 1001,100):
-    RFclf = RandomForestRegressor(n_estimators=i)
-    model = RFclf.fit(X_train, y_train)
-    predicted = model.predict(X_test)
-    pred_df = pd.concat([y_test.reset_index(drop=True), pd.Series(predicted)], axis=1)
-    pred_df.columns = ['true', 'pred']
-    RMSE = np.sqrt(mean_squared_error(pred_df['true'], pred_df['pred']))
-    RMSE_list.append(RMSE)
-    count.append(i)
+forest_grid.fit(X_train,y_train) #fit
+result = forest_grid.predict(X_test)
+MSE=mean_squared_error(y_test, result)
+R2=r2_score(y_test,result)
+print(MSE,R2)
+forest_grid_best = forest_grid.best_estimator_ #best estimator
+print("Best Model Parameter: ",forest_grid.best_params_)
+print('Best cross-validation: {}'.format(forest_grid.best_score_))
+
+dfsss.loc[4]=['lightgbm(All)',MSE,R2]
+
+print('mlp')
+
+sol=['adam']
+act=['relu']
+hidd=[]
+for i in [2,4,6]:
+    for j in [50,100,150]:
+        b=[j]*i
+        b=tuple(b)
+        hidd.append(b)
+alp=[1-4,1e-2,1e+0]
+param_grid = {'solver':sol,'activation':act,'hidden_layer_sizes':hidd,'alpha':alp}
+grid=GridSearchCV(MLPRegressor(),param_grid,cv=3)
+grid.fit(X_train,y_train)
+result=grid.predict(X_test)
+MSE=mean_squared_error(y_test, result)
+R2=r2_score(y_test,result)
+print(MSE,R2)
+print('Best parameters: {}'.format(grid.best_params_))
+print('Best cross-validation: {}'.format(grid.best_score_))
+
+dfsss.loc[5]=['MLPRegressor(All)',MSE,R2]
 
 
+selector = RFE(gbm_reg2, n_features_to_select=6)
+selector = selector.fit(X,  y)
+X_new = pd.DataFrame(selector.fit_transform(X, y), 
+                     columns=X.columns.values[selector.get_support()])
+print(X.columns.values[selector.get_support()])
 
-plt.figure(figsize=(16,8))
-plt.plot(count, RMSE_list, marker="o")
-plt.title("RMSE Values", fontsize=30)
-plt.xlabel("n_estimators", fontsize=20)
-plt.ylabel("RMSE Value", fontsize=20)
-plt.grid(True)
-plt.savefig("gurafu2.png")
+dfss=X_new
 
-feature_importances = pd.DataFrame([X_train.columns, model.feature_importances_]).T
-feature_importances.columns = ['features', 'importances']
-print(feature_importances)
-
-plt.figure(figsize=(20,10))
-plt.title('Importances')
-plt.rcParams['font.size']=10
-sns.barplot(y=feature_importances['features'], x=feature_importances['importances'], palette='viridis')
+dfss['LR']=y
 
 
-plt.savefig("gurafu3.png")
+dfss_train=splitmixture(dfss,a,n)[0]
+dfss_test=splitmixture(dfss,a,n)[1]
+
+dfss_train = dfss_train.sample(frac=1).reset_index(drop=True)
+
+Xnew_train = dfss_train.drop('LR', axis=1)
+ynew_train =  dfss_train['LR']
+
+Xnew_test = dfss_test.drop('LR', axis=1)
+ynew_test = dfss_test['LR']
+
+print('lightgbm')
+
+forest_grid.fit(Xnew_train, ynew_train) #fit
+result = forest_grid.predict(Xnew_test)
+MSE=mean_squared_error(ynew_test, result)
+R2=r2_score(ynew_test,result)
+print(MSE,R2)
+forest_grid_best = forest_grid.best_estimator_ #best estimator
+print("Best Model Parameter: ",forest_grid.best_params_)
+print('Best cross-validation: {}'.format(forest_grid.best_score_))
+
+dfsss.loc[6]=['lightgbm(RFE(lightgbm))',MSE,R2]
 
 
-'''
+print('mlp')
 
+grid.fit(Xnew_train, ynew_train)
+result=grid.predict(Xnew_test)
+MSE=mean_squared_error(ynew_test, result)
+R2=r2_score(ynew_test,result)
+print(MSE,R2)
+print('Best parameters: {}'.format(grid.best_params_))
+print('Best cross-validation: {}'.format(grid.best_score_))
+
+dfsss.loc[7]=['MLPRegressor(RFE(lightgbm))',MSE,R2]
+
+dfsss.to_excel('/mnt/c/CEA/predictions.xlsx')
