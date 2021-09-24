@@ -1,3 +1,4 @@
+from matplotlib import colors
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
@@ -14,7 +15,7 @@ import seaborn as sns
 from sklearn.model_selection import learning_curve
 from sklearn.ensemble import RandomForestRegressor
 
-df = pd.read_excel('/mnt/c/CEA/all_mixtureexp15.xlsx')
+df = pd.read_excel('all_mixtureexp15.xlsx')
 
 #3.1　特徴量の削減
 l=['P0', 'T0','H0[KJ/kg]', 'M0[kg/kmol]', 'γ0[-]', 'a0[m/s]', \
@@ -99,7 +100,7 @@ def plot_feature_importance(df):
 
 
 #reaction length
-df = pd.read_excel('/mnt/c/CEA/all_mixtureexp15.xlsx')
+df = pd.read_excel('all_mixtureexp15.xlsx')
 
 l1=['Fuel','Diluent','Equivalentratio','CoefficientDiluent','Oxidizer','P0', 'T0', 'H0[KJ/kg]', 'M0[kg/kmol]', 'γ0[-]', 'pcj[bar]', 'Tcj[K]',
        'Hcj[KJ/kg]', 'Mcj[kg/kmol]', 'γcj[-]', 'Mcj[-]', 'Tvn[K]',
@@ -116,17 +117,32 @@ XpcaFLRDED = XpcaFLRDED[~( XpcaFLRDED['Ea[KJ/kg]'] == 0)]
 dfH2train =  XpcaFLRDED[~( XpcaFLRDED['Fuel'] == 'H2') | ~( XpcaFLRDED['Equivalentratio'] == 1)]
 dfH2test = XpcaFLRDED[(XpcaFLRDED['Fuel'] == 'H2') & (XpcaFLRDED['Equivalentratio'] == 1)]
 
+print(len(dfH2train[(dfH2train['Fuel'] == 'H2')]),'H2')
+print(len(dfH2test),'H2')
+
 dfC2H2train =  dfH2train[~( dfH2train['Fuel'] == 'C2H2') | ~( dfH2train['Equivalentratio'] == 1) | ~(dfH2train['Diluent'].isnull())]
 dfC2H2test =  dfH2train[(dfH2train['Fuel'] == 'C2H2') & (dfH2train['Equivalentratio'] == 1) & (dfH2train['Diluent'].isnull())]
+
+print(len(dfC2H2train[(dfC2H2train['Fuel'] == 'C2H2') & (dfC2H2train['Diluent'].isnull())]),'C2H2')
+print(len(dfC2H2test),'C2H2')
 
 dfC2H4train =  dfC2H2train[~( dfC2H2train['Fuel'] == 'C2H4') | ~( dfC2H2train['Equivalentratio'] == 1) | ~(dfC2H2train['Diluent'].isnull())]
 dfC2H4test =  dfC2H2train[(dfC2H2train['Fuel'] == 'C2H4') & (dfC2H2train['Equivalentratio'] == 1) & (dfC2H2train['Diluent'].isnull())]
 
+print(len(dfC2H4train[(dfC2H4train['Fuel'] == 'C2H4') & (dfC2H4train['Diluent'].isnull())]),'C2H4')
+print(len(dfC2H4test),'C2H4')
+
 dfC2H6train =  dfC2H4train[~( dfC2H4train['Fuel'] == 'C2H6') | ~(dfC2H4train['Equivalentratio'] == 1) | ~(dfC2H4train['Diluent'].isnull()) | ~(dfC2H4train['Oxidizer'] == 'O2')]
 dfC2H6test =  dfC2H4train[(dfC2H4train['Fuel'] == 'C2H6') & (dfC2H4train['Equivalentratio'] == 1) & (dfC2H4train['Diluent'].isnull()) & (dfC2H4train['Oxidizer'] == 'O2')]
 
+print(len(dfC2H6train[(dfC2H6train['Fuel'] == 'C2H6')  & (dfC2H6train['Diluent'].isnull()) & (dfC2H6train['Oxidizer'] == 'O2')]),'C2H6')
+print(len(dfC2H6test),'C2H6')
+
 dfC2H2ARtrain =  dfC2H6train[~( dfC2H6train['Fuel'] == 'C2H2') | ~( dfC2H6train['Diluent'] == 'Ar') | ~(dfC2H6train['CoefficientDiluent'] == 7)]
 dfC2H2ARtest = dfC2H6train[(dfC2H6train['Fuel'] == 'C2H2') & (dfC2H6train['Diluent'] == 'Ar') & (dfC2H6train['CoefficientDiluent'] == 7)]
+
+print(len(dfC2H2ARtrain[(dfC2H2ARtrain['Fuel'] == 'C2H2') & (dfC2H2ARtrain['Diluent'] == 'Ar') ]),'C2H2AR')
+print(len(dfC2H2ARtest),'C2H2AR')
 
 #dfC2H2N2train =  dfC2H2ARtrain[~( dfC2H2ARtrain['Fuel'] == 'C2H2,acetylene') | ~( dfC2H2ARtrain['Diluent'] == 'N2') | ~(dfC2H2ARtrain['CoefficientDiluent'] == 7)]
 #dfC2H2N2test = dfC2H2ARtrain[(dfC2H2ARtrain['Fuel'] == 'C2H2,acetylene') & (dfC2H2ARtrain['Diluent'] == 'N2') & (dfC2H2ARtrain['CoefficientDiluent'] == 7)]
@@ -134,8 +150,17 @@ dfC2H2ARtest = dfC2H6train[(dfC2H6train['Fuel'] == 'C2H2') & (dfC2H6train['Dilue
 dfC2H4ARtrain =  dfC2H2ARtrain[~( dfC2H2ARtrain['Fuel'] == 'C2H4') | ~( dfC2H2ARtrain['Diluent'] == 'Ar') | ~(dfC2H2ARtrain['CoefficientDiluent'] == 4)]
 dfC2H4ARtest = dfC2H2ARtrain[(dfC2H2ARtrain['Fuel'] == 'C2H4') & (dfC2H2ARtrain['Diluent'] == 'Ar') & (dfC2H2ARtrain['CoefficientDiluent'] == 4)]
 
+print(len(dfC2H4ARtrain[(dfC2H4ARtrain['Fuel'] == 'C2H4') & (dfC2H4ARtrain['Diluent'] == 'Ar')]),'C2H4AR')
+print(len(dfC2H4ARtest),'C2H4AR')
+
 dftrain =  dfC2H4ARtrain[~( dfC2H4ARtrain['Fuel'] == 'C2H6') | ~(dfC2H4ARtrain['Oxidizer'] == 'N2O')]
 dfC2H6N2O = dfC2H4ARtrain[(dfC2H4ARtrain['Fuel'] == 'C2H6') & (dfC2H4ARtrain['Oxidizer'] == 'N2O')]
+
+#print(len(dftrain),len(dfC2H4ARtrain),'C2H4AR')
+#print(len(dfC2H6N2O),'C2H4AR')
+
+dfC2H2N2test = dftrain[(dftrain['Fuel'] == 'C2H2') & (dftrain['Diluent'] == 'N2')]
+print(len(dfC2H2N2test),'N2')
 
 dftrain = dftrain.drop(columns=['Diluent','Fuel','Equivalentratio','CoefficientDiluent','Oxidizer'])
 dfH2test = dfH2test.drop(columns=['Diluent','Fuel','Equivalentratio','CoefficientDiluent','Oxidizer'])
@@ -165,14 +190,14 @@ yC2H2ARtest = dfC2H2ARtest['Lr']
 yC2H4ARtest = dfC2H4ARtest['Lr']
 yC2H6N2Otest = dfC2H6N2O['Lr']
 
-X_val= dftrain.drop(columns=['Lr'])
-y_val =  dftrain['Lr']
+X_trainval= dftrain.drop(columns=['Lr'])
+y_trainval =  dftrain['Lr']
 
-X_train, X_test, y_train, y_test = train_test_split(X_val ,y_val, train_size=0.7, random_state=123)
+X_train, X_val, y_train, y_val = train_test_split(X_trainval ,y_trainval, train_size=0.7, random_state=123)
 
 ss = StandardScaler()
 sX_train = ss.fit_transform(X_train)
-sX_test = ss.transform(X_test)
+sX_val = ss.transform(X_val)
 sXH2test = ss.transform(XH2test)
 sXC2H2test = ss.transform(XC2H2test)
 sXC2H4test = ss.transform(XC2H4test)
@@ -187,21 +212,25 @@ sol=['adam']
 act=['relu']
 hidd=[]
 
-for i in [2,4,6]:
-    for j in [100,150,200]:
+for i in [4]:
+    for j in [150]:
         b=[j]*i
         b=tuple(b)
         hidd.append(b)
 
-alp=[1e-4,1e-2,1e+0]
+alp=[1e-4]
 param_grid = {'solver':sol,'activation':act,'hidden_layer_sizes':hidd,'alpha':alp}
 
 grid1=GridSearchCV(MLPRegressor(), param_grid , cv=2 , n_jobs=4)
 grid1.fit(sX_train,y_train)
-result1mlp1=grid1.predict(sX_test)
-MSE1=mean_squared_error(y_test, result1mlp1)
-R1=r2_score(y_test,result1mlp1)
-print('Test set score: {}'.format(grid1.score(sX_test, y_test)))
+result1=grid1.predict(sX_train)
+MSE1=mean_squared_error(y_train, result1)
+R1=r2_score(y_train, result1)
+
+result2=grid1.predict(sX_val)
+MSE1=mean_squared_error(y_val, result2)
+R1=r2_score(y_val,result2)
+print('Test set score: {}'.format(grid1.score(sX_val, y_val)))
 print('Best parameters: {}'.format(grid1.best_params_))
 print('Best cross-validation: {}'.format(grid1.best_score_))
 
@@ -235,10 +264,6 @@ resultC2H2AR=grid1.predict(sXC2H2ARtest)
 MSEC2H2AR=mean_squared_error(yC2H2ARtest, resultC2H2AR)
 R2C2H2AR=r2_score(yC2H2ARtest,resultC2H2AR)
 
-#resultC2H2N2=grid1.predict(sXC2H2N2test)
-#MSEC2H2N2=mean_squared_error(yC2H2N2test, resultC2H2N2)
-#R2C2H2N2=r2_score(yC2H2N2test,resultC2H2N2)
-
 resultC2H4AR=grid1.predict(sXC2H4ARtest)
 MSEC2H4AR=mean_squared_error(yC2H4ARtest, resultC2H4AR)
 R2C2H4AR=r2_score(yC2H4ARtest,resultC2H4AR)
@@ -252,7 +277,6 @@ print(pd.DataFrame([[MSEH2,R2H2,len(yH2test)], [MSEC2H2,R2C2H2,len(yC2H2test)], 
                    index=['H2', 'C2H2', 'C2H4','C2H6','C2H2AR','C2H4AR','C2H6N2O']))
 
 
-result = permutation_importance(grid1,sX_train,y_train, n_repeats=5, random_state=42)
 
 plt.figure(figsize=(5,5))
 
@@ -285,16 +309,21 @@ ptp = np.ptp(values)
 min_value = np.min(values) - ptp * 0.1
 max_value = np.max(values) + ptp * 0.1
 
-plt.plot([min_value, max_value], [min_value, max_value],color='black')
+plt.plot([0, 60], [0, 60],color='black')
 
-plt.scatter(yC2H6test,resultC2H6,s=30)
+plt.scatter(yH2test,resultH2,s=10,color='yellow')
+plt.scatter(yC2H2test,resultC2H2,s=10,color='red')
+plt.scatter(yC2H4test,resultC2H4,s=10,color='blue')
+plt.scatter(yC2H6test,resultC2H6,s=10,color='green')
+plt.scatter(yC2H2ARtest,resultC2H2AR,s=10,color='black')
+plt.scatter(yC2H4ARtest,resultC2H4AR,s=10,color='cyan')
 
-plt.xlim(min_value, max_value)
-plt.ylim(min_value, max_value)
-
+plt.xlim(0, 60)
+plt.ylim(0, 60)
+plt.xticks(np.arange(0, 61, step=20))
+plt.yticks(np.arange(0, 61, step=20))
 plt.xlabel('LR experiment [mm]')
 plt.ylabel('LR predict [mm]')
-plt.title("mlp")
 plt.tight_layout()
 plt.savefig("gurafu2(研究報告).png")
 
@@ -325,58 +354,20 @@ plt.rcParams['ytick.minor.visible'] = True
 plt.rcParams['ytick.minor.size'] = 5
 plt.rcParams['ytick.minor.width'] = 1.5
 
-values =  np.concatenate([yC2H6N2Otest, resultC2H6N2O], 0)
-ptp = np.ptp(values)
-min_value = np.min(values) - ptp * 0.1
-max_value = np.max(values) + ptp * 0.1
+plt.plot([0, 60], [0, 60],color='black')
 
-plt.plot([min_value, max_value], [min_value, max_value],color='black')
+plt.scatter(yC2H4test,resultC2H4,s=30,color='blue')
+plt.scatter(yC2H4test,resultC2H4,s=30,color='red')
 
-plt.scatter(yC2H6N2Otest,resultC2H6N2O,s=30)
-
-plt.xlim(min_value, max_value)
-plt.ylim(min_value, max_value)
+plt.xlim(0, 60)
+plt.ylim(0, 60)
+plt.xticks(np.arange(0, 61, step=20))
+plt.yticks(np.arange(0, 61, step=20))
 
 plt.xlabel('LR experiment [mm]')
 plt.ylabel('LR predict [mm]')
-plt.title("mlp")
 plt.tight_layout()
 plt.savefig("gurafu3(研究報告).png")
-
-
-
-
-cols = list(sX_train.columns)         # 特徴量名のリスト(目的変数CRIM以外)
-f_importance = np.array(result["importances"].mean(axis=1)) # 特徴量重要度の算出
-f_importance = f_importance / np.sum(f_importance)  # 正規化(必要ない場合はコメントアウト)
-df_importance = pd.DataFrame({'feature':cols, 'importance':f_importance})
-df1=df_importance
-df_importance = df_importance.sort_values("importance",ascending=False)
-
-plt.figure(figsize=(8,8))
-
-plt.rcParams['font.size'] = 18
-plt.rcParams['font.family'] = 'Arial'
-plt.rcParams['lines.linewidth'] = 2
-plt.rcParams['lines.markersize'] = 4.0
-
-plt.rcParams['axes.linewidth'] = 2.0
-
-# Tick Setting
-plt.rcParams['xtick.direction'] = 'in'
-plt.rcParams['xtick.top'] = True
-
-plt.rcParams['xtick.major.size'] = 10
-plt.rcParams['xtick.major.width'] = 2.0
-
-plt.rcParams['xtick.minor.visible'] = True
-plt.rcParams['xtick.minor.size'] = 5
-plt.rcParams['xtick.minor.width'] = 1.5
-#sns.barplot(x="Importance", y="Features",data=df_importance,ci=None)
-plot_feature_importance(df_importance)
-plt.title("Permutation Importance(mlp)")
-plt.tight_layout()
-plt.savefig("gurafu4(研究報告).png")
 
 
 
